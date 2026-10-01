@@ -19,6 +19,20 @@ from src.logging_setup import setup_logging
 
 log = setup_logging()
 
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
+
+def build_model(params: dict):
+    name = params["train"]["model"]
+    seed = params["seed"]
+    cfg = params["train"].get(name, {})
+
+    if name == "logreg":
+        return LogisticRegression(random_state=seed, **cfg)
+    if name == "random_forest":
+        return RandomForestClassifier(random_state=seed, n_jobs=-1, **cfg)
+    if name == "gradient_boosting":
+        return GradientBoostingClassifier(random_state=seed, **cfg)
 
 def main() -> None:
     params = load_params()
@@ -58,12 +72,7 @@ def main() -> None:
     log.info("Построение Pipeline...")
     pipe = Pipeline([
         ("preprocess", build_preprocessor(params)),
-        ("model", RandomForestClassifier(
-            n_estimators=100,
-            max_depth=10,
-            random_state=params["seed"],
-            n_jobs=-1,
-        )),
+        ("model", build_model(params)),
     ])
 
     # 4. Обучаем
