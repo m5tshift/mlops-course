@@ -12,15 +12,17 @@ TODO (занятие 1): перенести сюда логику из notebooks
 
 Запуск: python -m src.train
 """
+
 from __future__ import annotations
+
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 
 from src.config import load_params
 from src.logging_setup import setup_logging
 
 log = setup_logging()
 
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.linear_model import LogisticRegression
 
 def build_model(params: dict):
     name = params["train"]["model"]
@@ -34,20 +36,20 @@ def build_model(params: dict):
     if name == "gradient_boosting":
         return GradientBoostingClassifier(random_state=seed, **cfg)
 
+
 def main() -> None:
     params = load_params()
 
     # Импорты
     import json
     from pathlib import Path
-    import pandas as pd
-    import joblib
-    from sklearn.pipeline import Pipeline
-    from sklearn.ensemble import RandomForestClassifier
-    from sklearn.metrics import roc_auc_score, f1_score
-    from sklearn.metrics import precision_recall_curve, auc
 
-    from src.config import resolve, feature_columns, TARGET
+    import joblib
+    import pandas as pd
+    from sklearn.metrics import auc, f1_score, precision_recall_curve, roc_auc_score
+    from sklearn.pipeline import Pipeline
+
+    from src.config import TARGET, feature_columns, resolve
     from src.features import build_preprocessor
 
     # 1. Загружаем данные
@@ -58,8 +60,8 @@ def main() -> None:
     train_df = pd.read_csv(processed_dir / "train.csv")
     val_df = pd.read_csv(processed_dir / "val.csv")
 
-    log.info(f"train: {len(train_df)} строк, {(train_df[TARGET]==1).mean():.1%} оттока")
-    log.info(f"val  : {len(val_df)} строк, {(val_df[TARGET]==1).mean():.1%} оттока")
+    log.info(f"train: {len(train_df)} строк, {(train_df[TARGET] == 1).mean():.1%} оттока")
+    log.info(f"val  : {len(val_df)} строк, {(val_df[TARGET] == 1).mean():.1%} оттока")
 
     # 2. Признаки и целевая переменная
     cols = feature_columns(params)
@@ -70,10 +72,12 @@ def main() -> None:
 
     # 3. Строим Pipeline (препроцессор + модель)
     log.info("Построение Pipeline...")
-    pipe = Pipeline([
-        ("preprocess", build_preprocessor(params)),
-        ("model", build_model(params)),
-    ])
+    pipe = Pipeline(
+        [
+            ("preprocess", build_preprocessor(params)),
+            ("model", build_model(params)),
+        ]
+    )
 
     # 4. Обучаем
     log.info("Обучение...")
