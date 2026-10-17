@@ -1,14 +1,40 @@
 # Churn MLOps
 
-Сквозной проекта курса по [MLOps](https://github.com/alsu124/mlops-deploy-course)
+Сквозной проект курса по [MLOps](https://github.com/alsu124/mlops-deploy-course):
+предсказание оттока клиентов телеком-оператора по табличным данным.
+Задача бинарной классификации — определить, уйдёт ли клиент.
+Для обучения используется синтетический датасет с фиксированным seed.
+
+## Как запустить
+
+Нужны Python 3.11 и Make. Команды ниже предназначены для macOS/Linux.
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\Activate.ps1
+git clone https://github.com/m5tshift/mlops-course.git
+cd mlops-course
+python3.11 -m venv .venv
+source .venv/bin/activate
 make install
-make check                         # должно напечатать environment: OK
-make data                          # сгенерирует data/raw/churn.csv
+make check                         # проверка окружения
+make data                          # генерация data/raw/churn.csv
+make prepare                       # подготовка train/val/test
+make train                         # обучение и расчёт метрик
 ```
+
+Для Windows см. [настройку окружения по ОС](https://github.com/alsu124/mlops-deploy-course/blob/main/SETUP_BY_OS.md).
+
+Модель сохраняется в `models/model.joblib`, метрики — в
+`reports/train_metrics.json`. Алгоритм выбирается через `train.model` в
+[params.yaml](params.yaml): `logreg`, `random_forest` или `gradient_boosting`.
+После изменения параметров повторите `make train`.
+
+## Что сделано
+
+- Реализованы подготовка данных, заполнение пропусков и стратифицированное разбиение на train/val/test.
+- Собран Pipeline с обработкой числовых и категориальных признаков и обучением выбранной модели.
+- Сравнены три алгоритма; результаты и разбор F1 записаны в [отчёте об экспериментах](reports/EXPERIMENTS.md).
+- Настроены pre-commit и Ruff для автоматической проверки и форматирования кода.
+- Изменения оформляются через ветки и Pull Request; добавлен `.env.example`, данные и модели исключены из Git.
 
 ## Правила проекта
 
