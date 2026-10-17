@@ -1,9 +1,6 @@
-# Churn MLOps — стартовый шаблон
+# Churn MLOps
 
-Это заготовка сквозного проекта курса. Здесь вы работаете весь семестр:
-к декабрю из неё вырастет ML-сервис с пайплайном, тестами, CI/CD и мониторингом.
-
-## Что делать прямо сейчас
+Сквозной проекта курса по [MLOps](https://github.com/alsu124/mlops-deploy-course)
 
 ```bash
 python -m venv .venv
@@ -13,26 +10,6 @@ make check                         # должно напечатать environme
 make data                          # сгенерирует data/raw/churn.csv
 ```
 
-Если `make check` печатает `FAIL` — читайте [../docs/setup.md](../docs/setup.md).
-
-## Что уже готово, а что делаете вы
-
-| Готово | Ваша работа |
-|---|---|
-| `src/config.py` — загрузка `params.yaml` | `src/data/prepare.py` |
-| `src/logging_setup.py` — логирование | `src/features.py` |
-| `src/data/generate.py` — генерация данных | `src/train.py` |
-| `Makefile`, `params.yaml`, `.gitignore` | всё остальное, занятие за занятием |
-
-Генерация данных отдана готовой намеренно: предмет курса — не выдумывание
-датасета, а инженерия вокруг модели.
-
-## Отправная точка
-
-Файл [`notebooks/baseline_notebook.py`](notebooks/baseline_notebook.py) — это
-реальный код «как из ноутбука»: работает у автора и больше нигде.
-Первое занятие целиком про то, чтобы превратить его в воспроизводимый модуль.
-
 ## Правила проекта
 
 1. **Никаких абсолютных путей.** Только `src.config.resolve()`.
@@ -41,6 +18,27 @@ make data                          # сгенерирует data/raw/churn.csv
 4. **Секреты — только через переменные окружения.** `.env` уже в `.gitignore`.
 5. **Работа идёт через ветки и Pull Request.** С занятия 2.
 
-## Куда это вырастет
+## План и материалы курса
 
-`../docs/syllabus.md` — план всех 18 занятий и артефакт каждого из них.
+Все ссылки ведут в репозиторий преподавателя.
+
+### План и задания
+
+- [Тематический план](https://github.com/alsu124/mlops-deploy-course/blob/main/docs/syllabus.md) — темы и ожидаемые результаты всех 18 занятий.
+- [Дорожная карта](https://github.com/alsu124/mlops-deploy-course/blob/main/docs/course-roadmap.md) — работа на занятиях, домашние задания и этапы проекта.
+- [Методички занятий](https://github.com/alsu124/mlops-deploy-course/tree/main/lessons) — пошаговые задания и чек-листы в файлах `handout.md`.
+- [Конспекты теории](https://github.com/alsu124/mlops-deploy-course/blob/main/docs/theory/README.md) — что читать перед практикой.
+
+### Работа над проектом
+
+- [Памятка студента](https://github.com/alsu124/mlops-deploy-course/blob/main/docs/student-guide.md) — организация работы и правила курса.
+- [Быстрый старт](https://github.com/alsu124/mlops-deploy-course/blob/main/docs/quick-start.md) — структура проекта и основные команды.
+- [Настройка окружения по ОС](https://github.com/alsu124/mlops-deploy-course/blob/main/SETUP_BY_OS.md) — установка инструментов на macOS, Windows и Linux.
+- [Руководство по Git](https://github.com/alsu124/mlops-deploy-course/blob/main/STUDENT_GIT_GUIDE.md) — ветки, PR и ревью.
+- [Шпаргалка Git](https://github.com/alsu124/mlops-deploy-course/blob/main/GIT_CHEATSHEET.md) — команды для повседневной работы.
+- [Решение типичных проблем](https://github.com/alsu124/mlops-deploy-course/blob/main/docs/troubleshooting-guide.md) — помощь при ошибках.
+
+### Сдача и защита
+
+- [Как сдавать проект](https://github.com/alsu124/mlops-deploy-course/blob/main/HOW_TO_SUBMIT_LABS.md) — порядок сдачи и итоговой защиты.
+- [Критерии оценки](https://github.com/alsu124/mlops-deploy-course/blob/main/docs/assessment.md) — требования к зачёту и чек-лист защиты.
