@@ -28,6 +28,46 @@ make train                         # обучение и расчёт метри
 [params.yaml](params.yaml): `logreg`, `random_forest` или `gradient_boosting`.
 После изменения параметров повторите `make train`.
 
+## Данные
+
+Сырые данные и модель версионируются в [DVC](https://dvc.org). В Git лежат только указатели
+`data/raw/churn.csv.dvc` и `models/model.joblib.dvc` с хешами, сами файлы — в remote.
+Описание полей и известных дефектов — в [паспорте датасета](data/README.md).
+
+Remote по умолчанию — `minio`: бакет `s3://mlops/churn` в MinIO на `http://localhost:9000`.
+Ключи доступа в Git не хранятся, они задаются в `.dvc/config.local`.
+
+Как получить данные:
+
+```bash
+docker run -d --name minio -p 9000:9000 -p 9001:9001 \
+  -e MINIO_ROOT_USER=minioadmin -e MINIO_ROOT_PASSWORD=minioadmin \
+  cgr.dev/chainguard/minio server /data --console-address ":9001"   # после перезагрузки: docker start minio
+# в консоли http://localhost:9001 (minioadmin / minioadmin) создать бакет mlops
+dvc remote modify --local minio url s3://mlops/churn
+dvc remote modify --local minio endpointurl http://localhost:9000
+dvc remote modify --local minio access_key_id minioadmin
+dvc remote modify --local minio secret_access_key minioadmin
+dvc pull
+```
+
+MinIO запускается локально, поэтому на новой машине бакет пуст и `dvc pull` ничего не скачает.
+В этом случае данные можно сгенерировать заново: `make data` с тем же seed даёт побайтово тот же
+`churn.csv`, его хеш совпадает с `.dvc`-файлом. Дальше `make prepare && make train`.
+
+После изменения данных или модели: `dvc add <файл>`, коммит `.dvc`-файла, `dvc push`.
+
+### Почему `.dvc`-файл коммитится, а датасет — нет
+
+`.dvc`-файл — маленький текстовый указатель: хеш и размер данных. В Git он связывает коммит кода
+с конкретной версией данных: `git checkout` + `dvc checkout` возвращают их вместе. Сам датасет
+большой и бинарный, Git хранит каждую его версию целиком и навсегда раздувает историю,
+а сравнивать такие файлы построчно бессмысленно.
+
+Если сделать наоборот, сломается всё: без `.dvc`-файла в Git DVC не знает, какую версию данных
+скачать для коммита, и откат кода больше не возвращает данные. Датасет в Git раздувает
+репозиторий, упирается в лимиты GitHub на размер файлов и дублирует хранилище DVC.
+
 ## Что сделано
 
 - Реализованы подготовка данных, заполнение пропусков и стратифицированное разбиение на train/val/test.
