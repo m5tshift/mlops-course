@@ -119,6 +119,7 @@ def main() -> None:
 
     with open(metrics_path, "w") as f:
         json.dump(metrics, f, indent=2)
+        f.write("\n")  # иначе end-of-file-fixer правит файл после каждого обучения
 
     log.info(f"Метрики сохранены в {metrics_path}")
 
