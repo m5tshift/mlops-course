@@ -27,7 +27,7 @@ features:
     - has_tech_support
     - is_senior
 
-# TODO (занятие 3): перенести сюда гиперпараметры модели
+# Занятие 3: гиперпараметры модели
 train:
   model: logreg
   logreg:
@@ -41,3 +41,8 @@ train:
     n_estimators: 100
     learning_rate: 0.1
     max_depth: 3
+
+# Занятие 3: eval
+evaluate:
+  threshold: 0.5
+  min_roc_auc: 0.75

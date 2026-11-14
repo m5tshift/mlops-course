@@ -15,6 +15,9 @@ TODO (занятие 1): перенести сюда логику из notebooks
 
 from __future__ import annotations
 
+import platform
+import subprocess
+
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
@@ -37,6 +40,20 @@ def build_model(params: dict):
         return GradientBoostingClassifier(random_state=seed, **cfg)
 
 
+def git_sha() -> str:
+    """Короткий хеш текущего коммита. В копии без .git обучение падать не должно."""
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return out.stdout.strip()
+    except Exception:
+        return "unknown"
+
+
 def main() -> None:
     params = load_params()
 
@@ -45,12 +62,16 @@ def main() -> None:
     from pathlib import Path
 
     import joblib
+    import numpy as np
     import pandas as pd
     from sklearn.metrics import auc, f1_score, precision_recall_curve, roc_auc_score
     from sklearn.pipeline import Pipeline
 
     from src.config import TARGET, feature_columns, resolve
     from src.features import build_preprocessor
+
+    # Страховка: глобальный генератор NumPy, если какая-то библиотека возьмёт его без random_state
+    np.random.seed(params["seed"])
 
     # 1. Загружаем данные
     log.info("Загружаю данные...")
@@ -84,8 +105,9 @@ def main() -> None:
     pipe.fit(X_train, y_train)
 
     # 5. Предсказываем на валидации
+    # Порог из конфига, а не неявные 0.5 из predict(): тот же, что в evaluate.py
     y_pred_proba = pipe.predict_proba(X_val)[:, 1]
-    y_pred = pipe.predict(X_val)
+    y_pred = (y_pred_proba >= params["evaluate"]["threshold"]).astype(int)
 
     # 6. Считаем метрики
     roc_auc = roc_auc_score(y_val, y_pred_proba)
@@ -122,6 +144,21 @@ def main() -> None:
         f.write("\n")  # иначе end-of-file-fixer правит файл после каждого обучения
 
     log.info(f"Метрики сохранены в {metrics_path}")
+
+    # 9. Паспорт модели
+    meta = {
+        "model": params["train"]["model"],
+        "git_sha": git_sha(),
+        "python": platform.python_version(),
+        "features": cols,
+        "metrics": metrics,
+    }
+    meta_path = models_dir / "model_meta.json"
+    with open(meta_path, "w", encoding="utf-8") as f:
+        json.dump(meta, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+
+    log.info(f"Паспорт модели сохранён в {meta_path}")
 
 
 if __name__ == "__main__":
